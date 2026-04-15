@@ -541,6 +541,86 @@
       localStorage.setItem("theme", isDark ? "dark" : "light");
       themeBtn.textContent = isDark ? "白天模式" : "夜晚模式";
     });
+    
+  const themeBtn = document.getElementById("themeBtn");
+  const savedTheme = localStorage.getItem("theme");
+
+  if (savedTheme === "dark") {
+    document.body.classList.add("dark");
+    themeBtn.textContent = "白天模式";
+  }
+
+  themeBtn.addEventListener("click", () => {
+    document.body.classList.toggle("dark");
+    const isDark = document.body.classList.contains("dark");
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+    themeBtn.textContent = isDark ? "白天模式" : "夜晚模式";
+  });
+
+  const bgm = document.getElementById("bgm");
+  const musicIntro = document.getElementById("musicIntro");
+  const startMusicBtn = document.getElementById("startMusicBtn");
+  const skipMusicBtn = document.getElementById("skipMusicBtn");
+  const floatingPlayer = document.getElementById("floatingPlayer");
+
+  const musicAccepted = localStorage.getItem("musicAccepted");
+  const musicShouldPlay = localStorage.getItem("musicShouldPlay");
+
+  function updatePlayerText() {
+    if (bgm.paused) {
+      floatingPlayer.textContent = "♫ 音乐已暂停";
+    } else {
+      floatingPlayer.textContent = "♫ 音乐播放中";
+    }
+  }
+
+  async function playMusic() {
+    try {
+      await bgm.play();
+      localStorage.setItem("musicShouldPlay", "yes");
+      updatePlayerText();
+    } catch (err) {
+      console.log("播放被浏览器拦截了：", err);
+      updatePlayerText();
+    }
+  }
+
+  function hideIntro() {
+    musicIntro.classList.add("hidden");
+  }
+
+  if (musicAccepted === "yes") {
+    hideIntro();
+    if (musicShouldPlay === "yes") {
+      playMusic();
+    }
+  }
+
+  startMusicBtn.addEventListener("click", async () => {
+    localStorage.setItem("musicAccepted", "yes");
+    hideIntro();
+    await playMusic();
+  });
+
+  skipMusicBtn.addEventListener("click", () => {
+    localStorage.setItem("musicAccepted", "yes");
+    localStorage.setItem("musicShouldPlay", "no");
+    hideIntro();
+    bgm.pause();
+    updatePlayerText();
+  });
+
+  floatingPlayer.addEventListener("click", async () => {
+    if (bgm.paused) {
+      await playMusic();
+    } else {
+      bgm.pause();
+      localStorage.setItem("musicShouldPlay", "no");
+      updatePlayerText();
+    }
+  });
+
+  updatePlayerText();
   </script>
   <audio id="bgm" loop preload="auto">
   <source src="music/bgm.mp3" type="audio/mpeg" />
